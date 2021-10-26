@@ -1,9 +1,90 @@
 package main
 
 import (
-	"fmt"
+	"math/rand"
+	"strconv"
+	"time"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+type Apple struct {
+	posX   int32
+	posY   int32
+	width  int32
+	height int32
+	Color  rl.Color
+}
+
 func main() {
-	fmt.Println("Hello Bird")
+	screenWidth := int32(800)
+	screenHeight := int32(450)
+	rl.InitAudioDevice()
+	eat_noise := rl.LoadSound("sound/eat.wav")
+	rl.InitWindow(screenWidth, screenHeight, "FlappyThing")
+	rl.SetTargetFPS(60)
+
+	bat_down := rl.LoadImage("assets/bat_down.png")
+	bat_up := rl.LoadImage("assets/bat_up.png")
+	texture := rl.LoadTextureFromImage(bat_up)
+
+	rand.Seed(time.Now().UnixNano())
+	var apple_loc int = rand.Intn(int(screenHeight)-1) - 2
+	Apples := []Apple{}
+	current_apple := Apple{screenWidth, int32(apple_loc), 25, 25, rl.Red}
+	Apples = append(Apples, current_apple)
+
+	var x_coords int32 = screenWidth/2 - texture.Width/2
+	var y_coords int32 = screenHeight/2 - texture.Height/2 - 40
+	var score int = 0
+
+	for !rl.WindowShouldClose() {
+		rl.BeginDrawing()
+		rl.DrawTexture(texture, x_coords, y_coords, rl.White)
+		rl.DrawText("Current Score: "+strconv.Itoa(score), 0, 0, 30, rl.LightGray)
+		rl.ClearBackground(rl.RayWhite)
+		if rl.IsKeyDown(rl.KeySpace) {
+			texture = rl.LoadTextureFromImage(bat_up)
+			y_coords -= 5
+		} else {
+			texture = rl.LoadTextureFromImage(bat_down)
+			y_coords += 5
+		}
+
+		for io, current_apple := range Apples {
+			rl.DrawRectangle(
+				current_apple.posX,
+				current_apple.posY,
+				current_apple.width,
+				current_apple.height,
+				current_apple.Color,
+			)
+			Apples[io].posX = Apples[io].posX - 3
+			if current_apple.posX < 0 {
+				Apples[io].posX = screenWidth
+				Apples[io].posY = int32(rand.Intn(int(screenHeight)-1) - 2)
+				score--
+			}
+			if rl.CheckCollisionRecs(
+				rl.NewRectangle(float32(x_coords), float32(y_coords), float32(32), float32(32)),
+				rl.NewRectangle(float32(current_apple.posX), float32(current_apple.posY), float32(current_apple.width), float32(current_apple.height))) {
+				Apples[io].posX = screenWidth
+				Apples[io].posY = int32(rand.Intn(int(screenHeight)-1) - 2)
+				score++
+				rl.PlaySoundMulti(eat_noise)
+			}
+		}
+		if y_coords > 450 {
+			rl.UnloadTexture(texture)
+			Apples = nil
+			rl.DrawText("Your Final Score is "+strconv.Itoa(score), 30, 40, 30, rl.LightGray)
+		}
+
+		rl.EndDrawing()
+		time.Sleep(50000000)
+	}
+	rl.StopSoundMulti()
+	rl.UnloadSound(eat_noise)
+	rl.UnloadTexture(texture)
+	rl.CloseWindow()
 }
