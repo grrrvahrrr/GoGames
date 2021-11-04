@@ -42,6 +42,10 @@ func (mover *keyboardMover) onDraw(renderer *sdl.Renderer) error {
 	return nil
 }
 
+func (mover *keyboardMover) onCollision(other *element) error {
+	return nil
+}
+
 type keyboardShooter struct {
 	container *element
 	cooldown  time.Duration
@@ -76,6 +80,10 @@ func (mover *keyboardShooter) shoot(x, y float64) {
 	}
 }
 
-func (mover *keyboardShooter) onDraw(renderer *sdl.Renderer) error {
+func (shooter *keyboardShooter) onDraw(renderer *sdl.Renderer) error {
+	return nil
+}
+
+func (shooter *keyboardShooter) onCollision(other *element) error {
 	return nil
 }
