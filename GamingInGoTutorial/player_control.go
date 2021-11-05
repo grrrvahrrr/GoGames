@@ -27,11 +27,11 @@ func (mover *keyboardMover) onUpdate() error {
 
 	if keys[sdl.SCANCODE_LEFT] == 1 {
 		if mover.container.position.x-(mover.sr.width/2) > 0 {
-			mover.container.position.x -= mover.speed
+			mover.container.position.x -= mover.speed * delta
 		}
 	} else if keys[sdl.SCANCODE_RIGHT] == 1 {
 		if mover.container.position.x+(mover.sr.width/2) < screenWidth {
-			mover.container.position.x += mover.speed
+			mover.container.position.x += mover.speed * delta
 		}
 	}
 
